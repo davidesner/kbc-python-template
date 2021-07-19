@@ -37,12 +37,14 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v2
+      - name: Set tag env
+        run: echo "GITHUB_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Deploy
         run: |
           docker pull quay.io/keboola/developer-portal-cli-v2:latest
           chmod +x ./scripts/update_dev_portal_properties.sh
           chmod +x ./deploy.sh
-      - name: Run scripts
-        run: |
-          ./scripts/update_dev_portal_properties.sh
-          ./deploy.sh
+      - name: Update Developer portal properties
+        run: ./scripts/update_dev_portal_properties.sh
+      - name: Deploy
+        run: ./deploy.sh
