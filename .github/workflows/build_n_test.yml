@@ -17,6 +17,8 @@ jobs:
         run: docker run $APP_IMAGE flake8 /code/ --config=/code/flake8.cfg
       - name: Unit Test
         run: docker run $APP_IMAGE python -m unittest discover
+      - name: Branch name
+        run: echo running on branch ${GITHUB_REF##*/}
       - name: Set tag env
         run: echo "GITHUB_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
