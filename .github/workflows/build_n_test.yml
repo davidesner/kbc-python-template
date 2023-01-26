@@ -11,25 +11,27 @@ jobs:
       KBC_DEVELOPERPORTAL_APP: ${{ secrets.KBC_DEVELOPERPORTAL_APP }}
     steps:
       - uses: actions/checkout@v2
+      - name: Set tag env
+        run: echo "GITHUB_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Branch name
-        run: echo running on branch ${GITHUB_REF#refs/}
+        run: echo running on branch ${GITHUB_TAG//\//-}
       - name: Build image
         run: docker build . --tag=$APP_IMAGE
       - name: Run Flake Lint
         run: docker run $APP_IMAGE flake8 /code/ --config=/code/flake8.cfg
       - name: Unit Test
         run: docker run $APP_IMAGE python -m unittest discover
-      - name: Set tag env
-        run: echo "GITHUB_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Test tag name
+        run: echo "TEST_TAG=${GITHUB_TAG//\//-}" >> $GITHUB_ENV
 
         # Push test tag, uncomment to enable
-#      - name: Push test image
-#        uses: odinuv/action-push-to-ecr@master
-#        with:
-#          vendor: ${{ secrets.KBC_DEVELOPERPORTAL_VENDOR }}
-#          app_id: ${{ secrets.KBC_DEVELOPERPORTAL_APP }}
-#          username: ${{ secrets.KBC_DEVELOPERPORTAL_USERNAME }}
-#          password: ${{ secrets.KBC_DEVELOPERPORTAL_PASSWORD }}
-#          tag: test
-#          push_latest: true
-#          source_image: keboola-component
+      - name: Push test image
+        uses: odinuv/action-push-to-ecr@master
+        with:
+          vendor: ${{ secrets.KBC_DEVELOPERPORTAL_VENDOR }}
+          app_id: ${{ secrets.KBC_DEVELOPERPORTAL_APP }}
+          username: ${{ secrets.KBC_DEVELOPERPORTAL_USERNAME }}
+          password: ${{ secrets.KBC_DEVELOPERPORTAL_PASSWORD }}
+          tag: ${{ env.TEST_TAG }}
+          push_latest: true
+          source_image: keboola-component
