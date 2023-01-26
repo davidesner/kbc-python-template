@@ -11,6 +11,8 @@ jobs:
       KBC_DEVELOPERPORTAL_APP: ${{ secrets.KBC_DEVELOPERPORTAL_APP }}
     steps:
       - uses: actions/checkout@v2
+      - name: Branch name
+        run: echo running on branch ${GITHUB_REF#refs/}
       - name: Build image
         run: docker build . --tag=$APP_IMAGE
       - name: Run Flake Lint
